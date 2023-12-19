@@ -233,7 +233,7 @@ int usbi_alloc_event_data(struct libusb_context *ctx)
 	for_each_event_source(ctx, ievent_source)
 		ctx->event_data_cnt++;
 
-	fds = calloc(ctx->event_data_cnt, sizeof(*fds));
+	fds = ctx->event_data_cnt ? calloc(ctx->event_data_cnt, sizeof(*fds)) : NULL;
 	if (!fds)
 		return LIBUSB_ERROR_NO_MEM;
 

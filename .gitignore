@@ -38,6 +38,3 @@ src/.dirstamp
 # Documents
 ABOUT-NLS
 INSTALL
-
-# Binaries
-ptouch-print

@@ -108,6 +108,10 @@ int API_EXPORTED libusb_control_transfer(libusb_device_handle *dev_handle,
 	int completed = 0;
 	int r;
 
+  if (NULL == dev_handle) {
+		return LIBUSB_ERROR_OTHER;
+  }
+
 	if (usbi_handling_events(HANDLE_CTX(dev_handle)))
 		return LIBUSB_ERROR_BUSY;
 
@@ -178,6 +182,10 @@ static int do_sync_bulk_transfer(struct libusb_device_handle *dev_handle,
 	struct libusb_transfer *transfer;
 	int completed = 0;
 	int r;
+
+  if (NULL == dev_handle) {
+		return LIBUSB_ERROR_OTHER;
+  }
 
 	if (usbi_handling_events(HANDLE_CTX(dev_handle)))
 		return LIBUSB_ERROR_BUSY;

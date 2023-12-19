@@ -17,7 +17,7 @@ int gdFTUseFontConfig(int flag) {
 }
 
 int gdImageBlue(gdImage *im, int index) {
- return gdImageGetPixel(im, index, 0);
+ return index == 0 ? 0 : 255;
 }
 
 // Since we are working in grayscale for black and white, just use the average.
@@ -25,14 +25,29 @@ int gdImageColorAllocate(gdImage *im, int red, int green, int blue) {
   return (red + green + blue)/3;
 }
 
-void gdImageCopy(gdImage * dst, gdImage * src, int dstX, int dstY, int srcX, int srcY, int w, int h) {
-  CGRect srcR = CGRectMake(srcX, srcY, w, h);
+/// Copy a rectangle of pixels from src to dest. scaling the moved pixels if the rects don't match.
+///
+/// @param dst - destination
+/// @param src - source
+/// @param dstX - destination X
+/// @param dstY - destination Y
+/// @param srcX - source X
+/// @param srcY - source Y
+/// @param dstW - destination Width
+/// @param dstH - destination Height
+/// @param srcW - source Width
+/// @param srcH - source Height
+void gdImageScaledCopy(gdImage * dst, gdImage * src, double dstX, double dstY, double srcX, double srcY, double dstW, double dstH, double srcW, double srcH) {
   CGImageRef srcImage = CGBitmapContextCreateImage(src);
-  CGImageRef srcRectImage = CGImageCreateWithImageInRect(srcImage, srcR);
-  CGRect destR = CGRectMake(dstX, dstY, w, h);
-  CGContextDrawImage(dst, destR, srcRectImage);
+  CGImageRef srcRectImage = CGImageCreateWithImageInRect(srcImage, CGRectMake(srcX, srcY, srcW, srcH));
+  CGContextDrawImage(dst, CGRectMake(dstX, dstY, dstW, dstH), srcRectImage);
   CGImageRelease(srcRectImage);
   CGImageRelease(srcImage);
+}
+
+
+void gdImageCopy(gdImage * dst, gdImage * src, int dstX, int dstY, int srcX, int srcY, int w, int h) {
+  gdImageScaledCopy(dst, src, dstX, dstY, srcX, srcY, w, h, w, h);
 }
 
 gdImage *gdImageCreateFromPng(FILE *inFile) {
@@ -76,6 +91,14 @@ gdImage *gdImageCreatePalette(int x, int y) {
   return result;
 }
 
+gdImage *gdImageCreateScaled(gdImage *im, float scale) {
+  gdImage *result = gdImageCreatePalette(ceil(gdImageSX(im)*scale), ceil(gdImageSY(im)*scale));
+  if (result) {
+    gdImageScaledCopy(result, im, 0, 0, 0, 0, gdImageSX(im)*scale, gdImageSY(im)*scale, gdImageSX(im), gdImageSY(im));
+  }
+  return result;
+}
+
 void gdImageDestroy(gdImage *im) {
   CGContextRelease(im);
 }
@@ -86,7 +109,7 @@ int gdImageGetPixel(gdImage *im, int x, int y) {
 }
 
 int gdImageGreen(gdImage *im, int index) {
- return gdImageGetPixel(im, index, 0);
+ return index == 0 ? 0 : 255;
 }
 
 void gdImageLine(gdImage *im, int x1, int y1, int x2, int y2, int color) {
@@ -119,6 +142,7 @@ int gdImagePng(gdImage *im, FILE *outFile) {
   CGImageRef cgImage = CGBitmapContextCreateImage(im);
   if (cgImage) {
     NSImage *image = [[NSImage alloc] initWithCGImage:cgImage size:cgImageSize];
+    CGImageRelease(cgImage);
     if (image) {
       NSData *imageData = [image TIFFRepresentation];
       if (imageData) {
@@ -135,7 +159,7 @@ int gdImagePng(gdImage *im, FILE *outFile) {
 }
 
 int gdImageRed(gdImage *im, int index) {
- return gdImageGetPixel(im, index, 0);
+ return index == 0 ? 0 : 255;
 }
 
 void gdImageSetStyle(gdImage *im, int *style, int styleLength){

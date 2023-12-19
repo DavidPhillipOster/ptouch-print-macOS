@@ -80,7 +80,6 @@ int ptouch_open(ptouch_dev *ptdev)
 	libusb_device *dev;
 	libusb_device_handle *handle = NULL;
 	struct libusb_device_descriptor desc;
-	ssize_t cnt;
 	int r,i=0;
 
 	if ((*ptdev=malloc(sizeof(struct _ptouch_dev))) == NULL) {
@@ -100,11 +99,11 @@ int ptouch_open(ptouch_dev *ptdev)
 		return -1;
 	}
 //	libusb_set_debug(NULL, 3);
-	if ((cnt=libusb_get_device_list(NULL, &devs)) < 0) {
+	if ((libusb_get_device_list(NULL, &devs)) < 0) {
 		return -1;
 	}
 	while ((dev=devs[i++]) != NULL) {
-		if ((r=libusb_get_device_descriptor(dev, &desc)) < 0) {
+		if ((libusb_get_device_descriptor(dev, &desc)) < 0) {
 			fprintf(stderr, _("failed to get device descriptor"));
 			libusb_free_device_list(devs, 1);
 			return -1;
@@ -130,7 +129,7 @@ int ptouch_open(ptouch_dev *ptdev)
 					return -1;
 				}
 				libusb_free_device_list(devs, 1);
-				if ((r=libusb_kernel_driver_active(handle, 0)) == 1) {
+				if ((libusb_kernel_driver_active(handle, 0)) == 1) {
 					if ((r=libusb_detach_kernel_driver(handle, 0)) != 0) {
 						fprintf(stderr, _("error while detaching kernel driver: %s\n"), libusb_error_name(r));
 					}
@@ -245,7 +244,7 @@ int ptouch_getstatus(ptouch_dev ptdev)
 	while (tx == 0) {
 		w.tv_sec=0;
 		w.tv_nsec=100000000;	/* 0.1 sec */
-		r=nanosleep(&w, NULL);
+		nanosleep(&w, NULL);
 		if ((r=libusb_bulk_transfer(ptdev->h, 0x81, buf, 32, &tx, 0)) != 0) {
 			fprintf(stderr, _("read error: %s\n"), libusb_error_name(r));
 			return -1;

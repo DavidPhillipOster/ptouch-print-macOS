@@ -635,7 +635,9 @@ static void darwin_devices_detached (void *ptr, io_iterator_t rem_devices) {
 
     /* get the location from the i/o registry */
     ret = get_ioregistry_value_number (device, CFSTR("sessionID"), kCFNumberSInt64Type, &session);
-    (void) get_ioregistry_value_number (device, CFSTR("locationID"), kCFNumberSInt32Type, &locationID);
+    UInt32 locationID32 = 0;
+    (void) get_ioregistry_value_number (device, CFSTR("locationID"), kCFNumberSInt32Type, &locationID32);
+    locationID = locationID32;
     IOObjectRelease (device);
     if (!ret)
       continue;
@@ -1238,12 +1240,11 @@ static bool get_device_port (io_service_t service, UInt8 *port) {
 
 /* Returns 1 on success, 0 on failure. */
 static bool get_device_parent_sessionID(io_service_t service, UInt64 *parent_sessionID) {
-  IOReturn kresult;
   io_service_t parent;
 
   /* Walk up the tree in the IOService plane until we find a parent that has a sessionID */
   parent = service;
-  while((kresult = IORegistryEntryGetParentEntry (parent, kIOUSBPlane, &parent)) == kIOReturnSuccess) {
+  while(IORegistryEntryGetParentEntry (parent, kIOUSBPlane, &parent) == kIOReturnSuccess) {
     if (get_ioregistry_value_number (parent, CFSTR("sessionID"), kCFNumberSInt64Type, parent_sessionID)) {
         /* Success */
         return true;
@@ -1467,7 +1468,7 @@ static enum libusb_error darwin_scan_devices(struct libusb_context *ctx) {
 
   while ((service = IOIteratorNext (deviceIterator))) {
     ret = darwin_get_cached_device (ctx, service, &cached_device, &old_session_id);
-    if (ret < 0 || !cached_device->can_enumerate) {
+    if (ret < 0 || NULL == cached_device ||  !cached_device->can_enumerate) {
       continue;
     }
 

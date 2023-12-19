@@ -12,7 +12,7 @@ enum {
   GD_TRUE
 };
 
-static const char *VERSION = "0.01";
+static const char *VERSION = "0.02";
 
 static const int gdTransparent = 256;
 static const int gdStyled = 257;
@@ -23,6 +23,17 @@ typedef CGImage gdImage;
 int gdFTUseFontConfig(int flag);
 int gdImageBlue(gdImage *im, int index);
 int gdImageColorAllocate(gdImage *im, int red, int green, int blue);
+
+/// Copy a rectangle of pixels from src to dest.
+///
+/// @param dst - destination
+/// @param src - source
+/// @param dstX - destination X
+/// @param dstY - destination Y
+/// @param srcX - source X
+/// @param srcY - source Y
+/// @param w - Width
+/// @param h - Height
 void gdImageCopy(gdImage * dst, gdImage * src, int dstX, int dstY, int srcX, int srcY, int w, int h);
 gdImage *gdImageCreateFromPng(FILE *inFile);
 gdImage *gdImageCreatePalette(int x, int y);
@@ -32,6 +43,11 @@ int gdImageGreen(gdImage *im, int index);
 void gdImageLine(gdImage *im, int x1, int y1, int x2, int y2, int color);
 int gdImagePng(gdImage *im,FILE *outFile);
 int gdImageRed(gdImage *im, int index);
+
+/// @param im - source image.
+/// @param scale - positive scale factor. new image is ceil(x*scale), ceil(y*scale)
+/// @return a newly created gdImage that is original image rescaled
+gdImage *gdImageCreateScaled(gdImage *im, float scale);
 
 /// @param im	The image to draw onto.
 /// @param style array of pixel colors

@@ -68,8 +68,9 @@ bool debug=false;
 /* --------------------------------------------------------------------
    -------------------------------------------------------------------- */
 
-void rasterline_setpixel(uint8_t rasterline[16], int pixel)
+void rasterline_setpixel(uint8_t rasterline[16], int pixl)
 {
+  unsigned int pixel = pixl;
 	if (pixel > 128) {
 		return;
 	}
@@ -435,7 +436,7 @@ int parse_args(int argc, char **argv)
 				i++;
 			}
 		} else if (strcmp(&argv[i][1], "-version") == 0) {
-			fprintf(stderr, _("ptouch-print by Dominic Radermacher, Mac version %s \n"), VERSION);
+			fprintf(stderr, _("ptouch-print by Dominic Radermacher, for Mac by David Phillip Oster version %s \n"), VERSION);
 			exit(0);
 		} else {
 			usage(argv[0]);
@@ -505,6 +506,13 @@ int main(int argc, char *argv[])
 			exit(0);
 		} else if (strcmp(&argv[i][1], "-image") == 0) {
 			im=image_load(argv[++i]);
+      if (tape_width < gdImageSY(im)) {
+        gdImage *imScaled = gdImageCreateScaled(im, tape_width/(float)gdImageSY(im));
+        if (imScaled) {
+          gdImageDestroy(im);
+          im = imScaled;
+        }
+      }
 			out=img_append(out, im);
 			gdImageDestroy(im);
 			im = NULL;
